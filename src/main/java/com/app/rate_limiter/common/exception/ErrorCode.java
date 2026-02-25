@@ -19,6 +19,10 @@ public enum ErrorCode {
     REFRESH_TOKEN_EXPIRED("ID_008", "El refresh token ha expirado", HttpStatus.UNAUTHORIZED),
     REFRESH_TOKEN_REUSE_DETECTED("ID_009", "Reutilización de refresh token detectada, sesiones revocadas", HttpStatus.UNAUTHORIZED),
     PASSWORD_TOO_WEAK("ID_010", "La contraseña no cumple los requisitos mínimos de seguridad", HttpStatus.BAD_REQUEST),
+    TOKEN_NOT_FOUND("UT_001", "El token no existe o es inválido", HttpStatus.NOT_FOUND),
+    TOKEN_EXPIRED("UT_002", "El token ha expirado", HttpStatus.GONE),
+    TOKEN_ALREADY_USED("UT_003", "El token ya fue utilizado", HttpStatus.CONFLICT),
+    TOKEN_REVOKED("UT_004", "El token fue revocado", HttpStatus.UNAUTHORIZED),
 
     // Organization Errors
     TENANT_NOT_FOUND("ORG_001", "La organización no existe", HttpStatus.NOT_FOUND),
