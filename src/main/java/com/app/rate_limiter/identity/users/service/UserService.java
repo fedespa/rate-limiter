@@ -1,5 +1,7 @@
 package com.app.rate_limiter.identity.users.service;
 
+import com.app.rate_limiter.common.exception.AppException;
+import com.app.rate_limiter.common.exception.ErrorCode;
 import com.app.rate_limiter.identity.users.model.AppUser;
 import com.app.rate_limiter.identity.users.model.UserRole;
 import com.app.rate_limiter.identity.users.repository.AppUserRepository;
@@ -21,7 +23,7 @@ public class UserService {
         String hashPassword = this.passwordEncoder.encode(request.password());
 
         if (this.appUserRepository.existsByEmail(request.email())) {
-            // arrojar error
+            throw new AppException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
         AppUser appUser = AppUser.builder()

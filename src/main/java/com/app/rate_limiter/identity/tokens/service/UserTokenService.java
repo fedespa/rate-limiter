@@ -1,5 +1,7 @@
 package com.app.rate_limiter.identity.tokens.service;
 
+import com.app.rate_limiter.common.exception.AppException;
+import com.app.rate_limiter.common.exception.ErrorCode;
 import com.app.rate_limiter.common.util.HashUtils;
 import com.app.rate_limiter.identity.tokens.model.UserToken;
 import com.app.rate_limiter.identity.tokens.model.UserTokenType;
@@ -40,14 +42,18 @@ public class UserTokenService {
         String tokenHash = this.hashUtils.sha256(rawToken);
 
         UserToken token = this.userTokenRepository.findByTokenHashAndType(tokenHash, type)
-                .orElseThrow(() -> new RuntimeException("Token inválido o inexistente"));
+                .orElseThrow(() -> new AppException(ErrorCode.TOKEN_NOT_FOUND));
 
-        if (token.isRevoked() || token.getUsedAt() != null) {
-            throw new AppException("El token ya ha sido utilizado o revocado");
+        if (token.isRevoked()) {
+            throw new AppException(ErrorCode.TOKEN_REVOKED);
+        }
+
+        if (token.getUsedAt() != null) {
+            throw new AppException(ErrorCode.TOKEN_ALREADY_USED);
         }
 
         if (token.getExpiresAt().isBefore(Instant.now())) {
-            throw new AppException("El token ha expirado");
+            throw new AppException(ErrorCode.TOKEN_EXPIRED);
         }
 
         token.setUsedAt(Instant.now());
