@@ -36,4 +36,6 @@ public class AppUser extends AuditableEntity {
 
     private Instant deletedAt;
 
+    private Instant verifiedAt;
+
 }
