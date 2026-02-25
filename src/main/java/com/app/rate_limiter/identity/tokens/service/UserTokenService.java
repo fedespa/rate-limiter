@@ -52,17 +52,18 @@ public class UserTokenService {
             throw new AppException(ErrorCode.TOKEN_ALREADY_USED);
         }
 
-        if (token.getExpiresAt().isBefore(Instant.now())) {
+        Instant now = Instant.now();
+
+        if (token.getExpiresAt().isBefore(now)) {
             throw new AppException(ErrorCode.TOKEN_EXPIRED);
         }
 
-        token.setUsedAt(Instant.now());
+        token.setUsedAt(now);
         token.setRevoked(true);
 
         this.userTokenRepository.save(token);
 
         return token.getUser();
-
     }
 
 }
