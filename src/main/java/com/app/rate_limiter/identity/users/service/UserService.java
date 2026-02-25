@@ -24,12 +24,8 @@ public class UserService {
             // arrojar error
         }
 
-        Tenant tenant = Tenant.builder()
-                .id(request.tenantId())
-                .build();
-
         AppUser appUser = AppUser.builder()
-                .tenant(tenant)
+                .tenant(request.tenant())
                 .email(request.email())
                 .passwordHash(hashPassword)
                 .role(UserRole.ROLE_TENANT_ADMIN)

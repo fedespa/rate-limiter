@@ -30,7 +30,7 @@ public class AuthService {
 
         Tenant tenant = this.tenantService.createTenant(new CreateTenantRequest(request.tenantName()));
 
-        AppUser user = this.userService.createAdminUser(new CreateAdminUserRequest(request.email(), request.password(), tenant.getId()));
+        AppUser user = this.userService.createAdminUser(new CreateAdminUserRequest(request.email(), request.password(), tenant));
 
         // 3. Generar Token de Verificación
         String token = this.userTokenService.createVerificationToken(user);
@@ -38,8 +38,6 @@ public class AuthService {
         // 4. Enviar a RabbitMQ para proceso asíncrono (Communication Domain)
 
         return new RegisterResponse();
-
-
     }
 
 

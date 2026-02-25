@@ -1,10 +1,10 @@
 package com.app.rate_limiter.identity.users.request;
 
-import java.util.UUID;
+import com.app.rate_limiter.organization.tenant.model.Tenant;
 
 public record CreateAdminUserRequest(
         String email,
         String password,
-        UUID tenantId
+        Tenant tenant
 ) {
 }
