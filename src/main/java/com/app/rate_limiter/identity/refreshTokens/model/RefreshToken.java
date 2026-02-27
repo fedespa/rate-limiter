@@ -1,4 +1,4 @@
-package com.app.rate_limiter.identity.tokens.model;
+package com.app.rate_limiter.identity.refreshTokens.model;
 
 import com.app.rate_limiter.common.model.AuditableEntity;
 import com.app.rate_limiter.identity.users.model.AppUser;
@@ -10,23 +10,19 @@ import lombok.*;
 import java.time.Instant;
 
 @Entity
-@Table(name = "user_tokens")
+@Table(name = "refresh_tokens")
 @Getter @Setter
-@AllArgsConstructor @NoArgsConstructor
+@NoArgsConstructor @AllArgsConstructor
 @Builder
-public class UserToken extends AuditableEntity {
+public class RefreshToken extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
+    @ManyToOne(fetch = FetchType.LAZY)
     private AppUser user;
-
-    @Enumerated(EnumType.STRING)
-    @NotNull
-    private UserTokenType type;
 
     @NotBlank
     private String tokenHash;
@@ -34,10 +30,12 @@ public class UserToken extends AuditableEntity {
     @NotNull
     private Instant expiresAt;
 
-    private Instant usedAt;
-
     @NotNull
     @Builder.Default
     private boolean revoked = false;
+
+    public boolean isExpired() {
+        return this.expiresAt.isBefore(Instant.now());
+    }
 
 }

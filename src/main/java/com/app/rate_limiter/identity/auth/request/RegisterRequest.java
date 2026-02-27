@@ -9,6 +9,7 @@ public record RegisterRequest(
         String tenantName,
 
         @Email
+        @NotBlank
         String email,
 
         @NotBlank
