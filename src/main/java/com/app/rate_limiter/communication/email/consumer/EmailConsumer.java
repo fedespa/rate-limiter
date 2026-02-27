@@ -18,6 +18,7 @@ public class EmailConsumer {
 
         try {
             sendEmail(message);
+            log.info("Email enviado exitosamente a {}!",  message.to());
         } catch (Exception e) {
             log.warn("Fallo al enviar email a {}. Reintentando...", message.to());
             throw e;

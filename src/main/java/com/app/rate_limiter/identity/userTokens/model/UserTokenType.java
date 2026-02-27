@@ -1,4 +1,4 @@
-package com.app.rate_limiter.identity.tokens.model;
+package com.app.rate_limiter.identity.userTokens.model;
 
 public enum UserTokenType {
 

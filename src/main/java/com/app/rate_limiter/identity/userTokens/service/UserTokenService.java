@@ -1,11 +1,11 @@
-package com.app.rate_limiter.identity.tokens.service;
+package com.app.rate_limiter.identity.userTokens.service;
 
 import com.app.rate_limiter.common.exception.AppException;
 import com.app.rate_limiter.common.exception.ErrorCode;
 import com.app.rate_limiter.common.util.HashUtils;
-import com.app.rate_limiter.identity.tokens.model.UserToken;
-import com.app.rate_limiter.identity.tokens.model.UserTokenType;
-import com.app.rate_limiter.identity.tokens.repository.UserTokenRepository;
+import com.app.rate_limiter.identity.userTokens.model.UserToken;
+import com.app.rate_limiter.identity.userTokens.model.UserTokenType;
+import com.app.rate_limiter.identity.userTokens.repository.UserTokenRepository;
 import com.app.rate_limiter.identity.users.model.AppUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,6 +23,7 @@ public class UserTokenService {
 
     public String createVerificationToken(AppUser user) {
         String rawToken = UUID.randomUUID().toString();
+        System.out.println("RAW TOKEN (BORRAR EN PRODUCCION): " + rawToken);
         String tokenHash = this.hashUtils.sha256(rawToken);
 
         UserToken verificationToken = UserToken.builder()

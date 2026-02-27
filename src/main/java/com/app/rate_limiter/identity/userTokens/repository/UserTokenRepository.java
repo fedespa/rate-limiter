@@ -1,7 +1,7 @@
-package com.app.rate_limiter.identity.tokens.repository;
+package com.app.rate_limiter.identity.userTokens.repository;
 
-import com.app.rate_limiter.identity.tokens.model.UserToken;
-import com.app.rate_limiter.identity.tokens.model.UserTokenType;
+import com.app.rate_limiter.identity.userTokens.model.UserToken;
+import com.app.rate_limiter.identity.userTokens.model.UserTokenType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.jpa.repository.JpaRepository;

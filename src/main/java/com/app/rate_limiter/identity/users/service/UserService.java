@@ -2,14 +2,12 @@ package com.app.rate_limiter.identity.users.service;
 
 import com.app.rate_limiter.common.exception.AppException;
 import com.app.rate_limiter.common.exception.ErrorCode;
-import com.app.rate_limiter.identity.tokens.model.UserTokenType;
-import com.app.rate_limiter.identity.tokens.repository.UserTokenRepository;
-import com.app.rate_limiter.identity.tokens.service.UserTokenService;
+import com.app.rate_limiter.identity.userTokens.model.UserTokenType;
+import com.app.rate_limiter.identity.userTokens.service.UserTokenService;
 import com.app.rate_limiter.identity.users.model.AppUser;
 import com.app.rate_limiter.identity.users.model.UserRole;
 import com.app.rate_limiter.identity.users.repository.AppUserRepository;
 import com.app.rate_limiter.identity.users.request.CreateAdminUserRequest;
-import com.app.rate_limiter.organization.tenant.model.Tenant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 public class CustomUserDetails implements UserDetails {
 
@@ -14,6 +15,10 @@ public class CustomUserDetails implements UserDetails {
 
     public CustomUserDetails(AppUser user) {
         this.user = user;
+    }
+
+    public AppUser getUser() {
+        return this.user;
     }
 
     @Override
@@ -30,6 +35,14 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public String getUsername() {
         return this.user.getEmail();
+    }
+
+    public boolean isVerified() {
+        return this.user.getVerifiedAt() != null;
+    }
+
+    public UUID getUserId() {
+        return this.user.getId();
     }
 
     @Override
