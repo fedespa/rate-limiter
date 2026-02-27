@@ -1,10 +1,11 @@
 package com.app.rate_limiter.organization.apikeys.api;
 
 import com.app.rate_limiter.common.security.CustomUserDetails;
-import com.app.rate_limiter.organization.apikeys.model.ApiKey;
+import com.app.rate_limiter.organization.apikeys.api.response.CreateApiKeyResponse;
 import com.app.rate_limiter.organization.apikeys.request.CreateApiKeyRequest;
 import com.app.rate_limiter.organization.apikeys.service.ApiKeyService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -20,41 +21,15 @@ public class ApiKeyController {
 
     @PostMapping
     @PreAuthorize("hasRole('TENANT_ADMIN') or hasRole('TENANT_DEVELOPER')")
-    public void createApiKey(
+    public ResponseEntity<CreateApiKeyResponse> createApiKey(
             @PathVariable UUID tenantId,
-            @RequestBody CreateApiKeyRequest request,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
 
-        this.apiKeyService.create(tenantId, request);
+        this.apiKeyService.create(tenantId, userDetails);
 
+        return ResponseEntity.ok(new CreateApiKeyResponse());
     }
 
 
 }
-
-//@Component
-//@RequiredArgsConstructor
-//public class TenantAccessValidator {
-//
-//    private final TenantRepository tenantRepository;
-//
-//    public Tenant validateAndGetTenant(UUID tenantId, CustomUserDetails userDetails) {
-//
-//        Tenant tenant = tenantRepository.findById(tenantId)
-//                .orElseThrow(() -> ErrorCode.TENANT_NOT_FOUND);
-//
-//        if (tenant.getStatus() != TenantStatus.ACTIVE) {
-//            throw ErrorCode.TENANT_SUSPENDED;
-//        }
-//
-//        UUID userTenantId = userDetails.getUser().getTenant().getId();
-//
-//        if (!tenantId.equals(userTenantId)
-//                && userDetails.getUser().getRole() != UserRole.ROLE_SYSTEM_ADMIN) {
-//            throw ErrorCode.CROSS_TENANT_ACCESS;
-//        }
-//
-//        return tenant;
-//    }
-//}

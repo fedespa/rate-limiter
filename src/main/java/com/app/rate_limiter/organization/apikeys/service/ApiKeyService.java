@@ -1,7 +1,10 @@
 package com.app.rate_limiter.organization.apikeys.service;
 
+import com.app.rate_limiter.common.security.CustomUserDetails;
+import com.app.rate_limiter.organization.apikeys.api.response.CreateApiKeyResponse;
 import com.app.rate_limiter.organization.apikeys.repository.ApiKeyRepository;
-import com.app.rate_limiter.organization.apikeys.request.CreateApiKeyRequest;
+import com.app.rate_limiter.organization.tenant.model.Tenant;
+import com.app.rate_limiter.organization.tenant.service.TenantAccessValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,11 +15,12 @@ import java.util.UUID;
 public class ApiKeyService {
 
     private final ApiKeyRepository apiKeyRepository;
+    private final TenantAccessValidator tenantAccessValidator;
 
-    public void create(UUID tenantId, CreateApiKeyRequest request){
+    public CreateApiKeyResponse create(UUID tenantId, CustomUserDetails userDetails){
+        Tenant tenant = this.tenantAccessValidator.validateAndGetTenant(tenantId, userDetails);
 
-
-
+        return new CreateApiKeyResponse();
     }
 
 }
