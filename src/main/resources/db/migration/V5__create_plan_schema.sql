@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS plans (
+    id UUID PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    capacity INTEGER NOT NULL,
+    refill_rate INTEGER NOT NULL
+);
