@@ -2,7 +2,6 @@ package com.app.rate_limiter.organization.apikeys.api;
 
 import com.app.rate_limiter.common.security.CustomUserDetails;
 import com.app.rate_limiter.organization.apikeys.api.response.CreateApiKeyResponse;
-import com.app.rate_limiter.organization.apikeys.request.CreateApiKeyRequest;
 import com.app.rate_limiter.organization.apikeys.service.ApiKeyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -26,9 +25,9 @@ public class ApiKeyController {
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
 
-        this.apiKeyService.create(tenantId, userDetails);
+        CreateApiKeyResponse response = this.apiKeyService.create(tenantId, userDetails);
 
-        return ResponseEntity.ok(new CreateApiKeyResponse());
+        return ResponseEntity.ok(response);
     }
 
 

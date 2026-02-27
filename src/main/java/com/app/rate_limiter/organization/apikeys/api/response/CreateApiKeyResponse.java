@@ -1,4 +1,9 @@
 package com.app.rate_limiter.organization.apikeys.api.response;
 
-public record CreateApiKeyResponse() {
+import java.util.UUID;
+
+public record CreateApiKeyResponse(
+        String apiKey,
+        UUID keyId
+) {
 }
