@@ -46,8 +46,8 @@ public class JwtUtils {
         return jwt;
     }
 
-    public String extractId(DecodedJWT token) {
-        return token.getSubject();
+    public String extractEmail(DecodedJWT token) {
+        return token.getClaim("email").asString();
     }
 
 }
