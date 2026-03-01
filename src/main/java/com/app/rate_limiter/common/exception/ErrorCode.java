@@ -35,6 +35,7 @@ public enum ErrorCode {
     API_KEY_NOT_FOUND("KEY_001", "La API Key no existe", HttpStatus.UNAUTHORIZED),
     API_KEY_REVOKED("KEY_002", "La API Key ha sido revocada", HttpStatus.UNAUTHORIZED),
     API_KEY_INVALID_FORMAT("KEY_003", "Formato de API Key inválido", HttpStatus.BAD_REQUEST),
+    INVALID_API_KEY("KEY_004", "API Key no válida", HttpStatus.BAD_REQUEST),
 
     // Plan Errors
     PLAN_NOT_FOUND("PLAN_001", "El plan no existe", HttpStatus.NOT_FOUND),

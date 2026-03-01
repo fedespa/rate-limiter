@@ -1,13 +1,17 @@
 package com.app.rate_limiter.organization.apikeys.service;
 
+import com.app.rate_limiter.common.exception.AppException;
+import com.app.rate_limiter.common.exception.ErrorCode;
 import com.app.rate_limiter.common.security.CustomUserDetails;
 import com.app.rate_limiter.common.util.HashUtils;
+import com.app.rate_limiter.organization.apikeys.api.dto.ApiKeyConfig;
 import com.app.rate_limiter.organization.apikeys.api.response.CreateApiKeyResponse;
 import com.app.rate_limiter.organization.apikeys.model.ApiKey;
 import com.app.rate_limiter.organization.apikeys.repository.ApiKeyRepository;
 import com.app.rate_limiter.organization.tenant.model.Tenant;
 import com.app.rate_limiter.organization.tenant.service.TenantAccessValidator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +42,25 @@ public class ApiKeyService {
         this.apiKeyRepository.save(apiKey);
 
         return new CreateApiKeyResponse(rawApikey, apiKey.getId());
+    }
+
+    @Cacheable(value = "api_keys", key = "#rawApiKey")
+    public ApiKeyConfig getApiKeyInfo(String rawApiKey) {
+
+        String hashedApikey = this.hashUtils.sha256(rawApiKey);
+
+        return this.apiKeyRepository.findByKeyHash(hashedApikey)
+                .map(key -> {
+                    var plan = key.getTenant().getPlan();
+
+                    return new ApiKeyConfig(
+                            plan.getCapacity(),
+                            plan.getRefillRate(),
+                            key.getTenant().getId(),
+                            key.getKeyHash()
+                    );
+                })
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_API_KEY));
     }
 
     private String generateApiKey() {
