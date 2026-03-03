@@ -30,6 +30,7 @@ public enum ErrorCode {
     TENANT_NOT_FOUND("ORG_001", "La organización no existe", HttpStatus.NOT_FOUND),
     TENANT_SUSPENDED("ORG_002", "La organización se encuentra suspendida", HttpStatus.FORBIDDEN),
     TENANT_INACTIVE("ORG_003", "La organización está inactiva", HttpStatus.FORBIDDEN),
+    TENANT_ALREADY_EXISTS("ORG_004", "La organización ya existe", HttpStatus.CONFLICT),
 
     // API Key Errors
     API_KEY_NOT_FOUND("KEY_001", "La API Key no existe", HttpStatus.UNAUTHORIZED),
