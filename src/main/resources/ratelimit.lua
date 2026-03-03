@@ -1,41 +1,62 @@
--- KEYS[1]: El ID del bucket (ej: "rl:tenant_id:key_hash")
--- ARGV[1]: Capacidad máxima del bucket (Burst/Capacity del Plan)
--- ARGV[2]: Tasa de recarga (Tokens por segundo del Plan)
--- ARGV[3]: Timestamp actual en segundos (Enviado desde Java)
--- ARGV[4]: Cantidad de tokens pedidos (Usualmente 1)
+-- KEYS[1]: bucket key
+-- ARGV[1]: capacity (burst)
+-- ARGV[2]: refill_rate (tokens per second)
+-- ARGV[3]: requested tokens
 
 local key = KEYS[1]
 local capacity = tonumber(ARGV[1])
 local refill_rate = tonumber(ARGV[2])
-local now = tonumber(ARGV[3])
-local requested = tonumber(ARGV[4])
+local requested = tonumber(ARGV[3])
 
--- 1. Recuperar el estado actual del bucket desde un Hash de Redis
--- 'tokens': cantidad disponible, 'last_refill': última vez que se actualizó
-local last_state = redis.call('HMGET', key, 'tokens', 'last_refill')
-local tokens = tonumber(last_state[1]) or capacity
-local last_refill = tonumber(last_state[2]) or now
+-- Usamos el tiempo de Redis (fuente única de verdad)
+local time = redis.call("TIME")
+local now_sec = tonumber(time[1])
+local now_usec = tonumber(time[2])
+local now = now_sec + (now_usec / 1000000)
 
--- 2. Calcular cuántos tokens se han generado por el paso del tiempo
-local elapsed = math.max(0, now - last_refill)
-local generated = elapsed * refill_rate
+-- Leer estado actual
+local state = redis.call("HMGET", key, "tokens", "last_refill")
 
--- 3. Actualizar el contador sin superar la capacidad máxima (Burst)
-tokens = math.min(capacity, tokens + generated)
+local tokens = tonumber(state[1])
+local last_refill = tonumber(state[2])
 
--- 4. Determinar si la petición es permitida
-local allowed = tokens >= requested
-if allowed then
+-- Inicialización si no existe
+if not tokens then
+    tokens = capacity
+    last_refill = now
+end
+
+-- Calcular tiempo transcurrido en segundos
+local elapsed = now - last_refill
+if elapsed < 0 then
+    elapsed = 0
+end
+
+-- Refill basado en tiempo absoluto
+local new_tokens = tokens + (elapsed * refill_rate)
+if new_tokens > capacity then
+    new_tokens = capacity
+end
+
+-- Actualizar referencia temporal SOLO después del cálculo
+tokens = new_tokens
+last_refill = now
+
+-- Decidir si se permite
+local allowed = 0
+if tokens >= requested then
+    allowed = 1
     tokens = tokens - requested
 end
 
--- 5. Guardar el nuevo estado en Redis
-redis.call('HMSET', key, 'tokens', tokens, 'last_refill', now)
+-- Guardar estado actualizado
+redis.call("HMSET", key,
+    "tokens", tokens,
+    "last_refill", last_refill
+)
 
--- 6. Configurar expiración automática para no llenar la RAM de Redis con llaves viejas
--- Expiramos la llave si no se usa en el tiempo que tardaría en llenarse el balde x 2
-local ttl = math.ceil(capacity / refill_rate) * 2
-redis.call('EXPIRE', key, math.max(ttl, 60))
+-- TTL dinámico (2x tiempo de llenado completo)
+local ttl = math.ceil((capacity / refill_rate) * 2)
+redis.call("EXPIRE", key, math.max(ttl, 60))
 
--- Retornamos: [1 si es permitido / 0 si no, tokens restantes]
-return {allowed and 1 or 0, math.floor(tokens)}
+return {allowed, math.floor(tokens)}

@@ -9,7 +9,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -32,7 +31,6 @@ public class RateLimitService {
         List<String> args = List.of(
           String.valueOf(config.burstCapacity()),
           String.valueOf(config.refillRate()),
-          String.valueOf(Instant.now().getEpochSecond()),
           "1"
         );
 

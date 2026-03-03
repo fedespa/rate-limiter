@@ -22,6 +22,10 @@ public class RateLimitController {
     @PostMapping
     public ResponseEntity<CheckResponse> checkLimit(@RequestHeader("X-API-KEY") String apiKey){
 
+        if (apiKey == null || apiKey.isBlank()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
         RateLimitResult result = this.rateLimitService.check(apiKey);
 
         HttpHeaders headers = new HttpHeaders();
