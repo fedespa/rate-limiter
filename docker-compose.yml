@@ -31,9 +31,33 @@ services:
         interval: 5s
         timeout: 5s
         retries: 5
+  redis:
+    image: redis:7.2-alpine
+    container_name: ratelimiter-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+  redis-insight:
+    image: redis/redisinsight:latest
+    container_name: ratelimiter-insight
+    ports:
+      - "5540:5540"
+    volumes:
+        - redisinsight_data:/data
+
+
 volumes:
   postgres_data:
   rabbitmq_data:
+  redis_data:
+  redisinsight_data:
 
 networks:
   default:
