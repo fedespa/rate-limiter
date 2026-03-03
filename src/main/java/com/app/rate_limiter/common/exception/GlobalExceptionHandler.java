@@ -3,6 +3,7 @@ package com.app.rate_limiter.common.exception;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -57,6 +58,18 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(error);
+    }
+
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<ApiError> handleAuthorizationDenied(AuthorizationDeniedException ex) {
+        ApiError error = new ApiError(
+                "ACCESS_DENIED",
+                "Accesso denegado",
+                Instant.now(),
+                null
+        );
+
+        return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
     }
 
     // Maneja cualquier otro error inesperado (500)
