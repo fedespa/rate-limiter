@@ -35,6 +35,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/v1/api/auth/**").permitAll()
                         .requestMatchers("/v1/api/check").permitAll()
+                        .requestMatchers("/v1/api/invitations/{token}/accept").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(

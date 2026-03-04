@@ -8,10 +8,13 @@ import com.app.rate_limiter.identity.users.model.AppUser;
 import com.app.rate_limiter.identity.users.model.UserRole;
 import com.app.rate_limiter.identity.users.repository.AppUserRepository;
 import com.app.rate_limiter.identity.users.request.CreateAdminUserRequest;
+import com.app.rate_limiter.organization.invitations.model.Invitation;
+import com.app.rate_limiter.organization.tenant.model.Tenant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.sql.Savepoint;
 import java.time.Instant;
 
 @Service
@@ -53,6 +56,27 @@ public class UserService {
         user.setVerifiedAt(Instant.now());
 
         this.appUserRepository.save(user);
+    }
+
+    public AppUser createUserFromInvitation(
+            String email,
+            String rawPassword,
+            Tenant tenant,
+            UserRole role
+    ) {
+        String hashPassword = this.passwordEncoder.encode(rawPassword);
+
+        AppUser user = AppUser.builder()
+                .tenant(tenant)
+                .email(email)
+                .passwordHash(hashPassword)
+                .role(role)
+                .verifiedAt(Instant.now())
+                .build();
+
+        AppUser savedUser = this.appUserRepository.save(user);
+
+        return savedUser;
     }
 
 }

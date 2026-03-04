@@ -31,6 +31,8 @@ public enum ErrorCode {
     TENANT_SUSPENDED("ORG_002", "La organización se encuentra suspendida", HttpStatus.FORBIDDEN),
     TENANT_INACTIVE("ORG_003", "La organización está inactiva", HttpStatus.FORBIDDEN),
     TENANT_ALREADY_EXISTS("ORG_004", "La organización ya existe", HttpStatus.CONFLICT),
+    ALREADY_MEMBER("ORG_005", "El usuario ya es miembro de la organización.", HttpStatus.CONFLICT),
+    USER_ALREADY_ASSIGNED("ORG_006", "El usuario ya es parte de otra organización", HttpStatus.CONFLICT),
 
     // API Key Errors
     API_KEY_NOT_FOUND("KEY_001", "La API Key no existe", HttpStatus.UNAUTHORIZED),
@@ -56,6 +58,7 @@ public enum ErrorCode {
     INVITATION_EXPIRED("INV_002", "La invitación ha expirado", HttpStatus.GONE),
     INVITATION_ALREADY_ACCEPTED("INV_003", "La invitación ya fue aceptada", HttpStatus.CONFLICT),
     INVITATION_EMAIL_MISMATCH("INV_004", "El email no coincide con el de la invitación", HttpStatus.BAD_REQUEST),
+    INVITATION_ALREADY_PENDING("INV_005", "El usuario ya ha sido invitado",  HttpStatus.CONFLICT),
 
     // Infrastructure Errors
     REDIS_UNAVAILABLE("INFRA_001", "El servicio de caché no está disponible", HttpStatus.SERVICE_UNAVAILABLE),

@@ -2,6 +2,7 @@ package com.app.rate_limiter.communication.email.producer;
 
 import com.app.rate_limiter.common.rabbit.RabbitMQConfig;
 import com.app.rate_limiter.communication.email.dto.EmailMessage;
+import com.app.rate_limiter.communication.email.dto.InvitationMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -17,6 +18,9 @@ public class EmailProducer {
 
     @Value("${app.url-base}")
     private String baseUrl;
+
+    @Value("${app.front-url-base}")
+    private String frontUrl;
 
     public void sendVerificationEmail(String to, String token){
         String url = this.baseUrl + "/v1/auth/verify?token=" + token;
@@ -34,7 +38,23 @@ public class EmailProducer {
                 RabbitMQConfig.ROUTING_KEY_EMAIL,
                 message
         );
+    }
 
+    public void sendInvitationEmail(String to, String tenantName, String token){
+
+        String url = this.frontUrl + "/invitations/accept?token=" + token;
+
+        InvitationMessage message = new InvitationMessage(
+                to,
+                "Acepta la invitación",
+                "Haz click para aceptar la invitación y formar parte de " + tenantName + ": " + url
+        );
+
+        this.rabbitTemplate.convertAndSend(
+                RabbitMQConfig.EXCHANGE,
+                RabbitMQConfig.ROUTING_KEY_INVITATIONS,
+                message
+        );
     }
 
 }
