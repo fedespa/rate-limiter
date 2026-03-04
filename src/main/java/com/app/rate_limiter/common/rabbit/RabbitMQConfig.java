@@ -17,9 +17,45 @@ public class RabbitMQConfig {
     public static final String DLQ_EMAIL = "q.notifications.email.dlq";
     public static final String DLQ_ROUTING_KEY = "notifications.email.dlq";
 
+    public static final String QUEUE_INVITATIONS = "q.invitations.email";
+    public static final String ROUTING_KEY_INVITATIONS = "invitations.email";
+
+    public static final String DLQ_INVITATIONS = "q.invitations.email.dlq";
+    public static final String DLQ_ROUTING_KEY_INVITATIONS = "invitations.email.dlq";
+
     @Bean
     public MessageConverter messageConverter() {
         return new JacksonJsonMessageConverter();
+    }
+
+    // Configuracion DLQ Invitations
+    @Bean
+    public Queue deadLetterQueueInvitations() {
+        return QueueBuilder.durable(DLQ_INVITATIONS).build();
+    }
+
+    @Bean
+    public Binding dlqBindingInvitations() {
+        return BindingBuilder.bind(deadLetterQueueInvitations())
+                .to(deadLetterExchange())
+                .with(DLQ_ROUTING_KEY_INVITATIONS);
+    }
+
+    // Configuracion cola de invitations
+    @Bean
+    public Queue invitationQueue(){
+        return QueueBuilder.durable(QUEUE_INVITATIONS)
+                .withArgument("x-dead-letter-exchange", DLQ_EXCHANGE)
+                .withArgument("x-dead-letter-routing-key", DLQ_ROUTING_KEY_INVITATIONS)
+                .build();
+    }
+
+    @Bean
+    public Binding invitationBinding() {
+        return BindingBuilder
+                .bind(invitationQueue())
+                .to(exchange())
+                .with(ROUTING_KEY_INVITATIONS);
     }
 
     // Configuracion de DLQ
