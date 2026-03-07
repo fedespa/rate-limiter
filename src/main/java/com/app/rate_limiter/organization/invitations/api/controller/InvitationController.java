@@ -7,7 +7,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +18,6 @@ public class InvitationController {
     private final InvitationService invitationService;
 
     @PostMapping
-    @PreAuthorize("hasRole('TENANT_ADMIN')")
     public ResponseEntity<?> invite(
             @PathVariable("tenantId") String tenantId,
             @Valid @RequestBody CreateInvitationRequest createInvitationRequest,

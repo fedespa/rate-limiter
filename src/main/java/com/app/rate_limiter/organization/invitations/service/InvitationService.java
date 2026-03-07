@@ -3,6 +3,7 @@ package com.app.rate_limiter.organization.invitations.service;
 import com.app.rate_limiter.common.exception.AppException;
 import com.app.rate_limiter.common.exception.ErrorCode;
 import com.app.rate_limiter.common.security.CustomUserDetails;
+import com.app.rate_limiter.common.security.annotation.RequiresVerificationAndAdmin;
 import com.app.rate_limiter.common.util.HashUtils;
 import com.app.rate_limiter.communication.email.producer.EmailProducer;
 import com.app.rate_limiter.identity.users.model.AppUser;
@@ -36,6 +37,7 @@ public class InvitationService {
     private final EmailProducer emailProducer;
 
     @Transactional
+    @RequiresVerificationAndAdmin
     public void create(String tenantId, CustomUserDetails userDetails, CreateInvitationRequest request){
 
         Tenant tenant = this.tenantAccessValidator.validateAndGetTenant(UUID.fromString(tenantId), userDetails);

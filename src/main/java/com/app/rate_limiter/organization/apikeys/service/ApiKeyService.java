@@ -3,6 +3,7 @@ package com.app.rate_limiter.organization.apikeys.service;
 import com.app.rate_limiter.common.exception.AppException;
 import com.app.rate_limiter.common.exception.ErrorCode;
 import com.app.rate_limiter.common.security.CustomUserDetails;
+import com.app.rate_limiter.common.security.annotation.RequiresVerificationAndAdminOrDeveloper;
 import com.app.rate_limiter.common.util.HashUtils;
 import com.app.rate_limiter.organization.apikeys.api.dto.ApiKeyConfig;
 import com.app.rate_limiter.organization.apikeys.api.response.CreateApiKeyResponse;
@@ -28,6 +29,7 @@ public class ApiKeyService {
     private final HashUtils hashUtils;
 
     @Transactional
+    @RequiresVerificationAndAdminOrDeveloper
     public CreateApiKeyResponse create(UUID tenantId, CustomUserDetails userDetails){
         Tenant tenant = this.tenantAccessValidator.validateAndGetTenant(tenantId, userDetails);
 

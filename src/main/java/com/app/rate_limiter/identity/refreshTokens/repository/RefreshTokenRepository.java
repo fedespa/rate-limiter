@@ -13,13 +13,12 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
 
     @Query("""
         SELECT rt FROM RefreshToken rt
-        JOIN FETCH rt.user
         WHERE rt.tokenHash = :tokenHash
     """)
     Optional<RefreshToken> findByTokenHash(@Param("tokenHash") String tokenHash);
 
     @Modifying
-    @Query("UPDATE RefreshToken r SET r.revoked = true WHERE r.user.id = :userId")
+    @Query("UPDATE RefreshToken r SET r.revoked = true WHERE r.userId = :userId")
     void revokeAllUserTokens(@Param("userId") UUID userId);
 
 }

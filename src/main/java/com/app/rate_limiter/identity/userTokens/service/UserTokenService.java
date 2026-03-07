@@ -23,7 +23,7 @@ public class UserTokenService {
 
     public String createVerificationToken(AppUser user) {
         String rawToken = UUID.randomUUID().toString();
-        System.out.println("RAW TOKEN (BORRAR EN PRODUCCION): " + rawToken);
+        // System.out.println("RAW TOKEN (BORRAR EN PRODUCCION): " + rawToken);
         String tokenHash = this.hashUtils.sha256(rawToken);
 
         UserToken verificationToken = UserToken.builder()

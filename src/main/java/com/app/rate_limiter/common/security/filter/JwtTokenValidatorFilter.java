@@ -1,5 +1,6 @@
-package com.app.rate_limiter.common.security;
+package com.app.rate_limiter.common.security.filter;
 
+import com.app.rate_limiter.common.security.CustomUserDetails;
 import com.app.rate_limiter.common.util.jwt.JwtUtils;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import jakarta.servlet.FilterChain;
@@ -9,19 +10,23 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
 public class JwtTokenValidatorFilter extends OncePerRequestFilter {
 
     private final JwtUtils jwtUtils;
-    private final UserDetailsServiceImpl userDetailsService;
 
     @Override
     protected void doFilterInternal(
@@ -46,27 +51,41 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
 
         String token = authHeader.substring(7);
 
-        DecodedJWT decodedJWT;
+        DecodedJWT decodedJWT = jwtUtils.validateToken(token);
 
-        try {
-            decodedJWT = this.jwtUtils.validateToken(token);
-        } catch (Exception e) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+        String email = jwtUtils.extractEmail(decodedJWT);
+        List<String> roles = decodedJWT.getClaim("roles").asList(String.class);
 
-        String email = this.jwtUtils.extractEmail(decodedJWT);
+        List<GrantedAuthority> authorities = roles.stream()
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
 
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            CustomUserDetails userDetails = (CustomUserDetails) this.userDetailsService.loadUserByUsername(email);
 
-            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                    userDetails,
-                    null,
-                    userDetails.getAuthorities()
+            UUID userId = UUID.fromString(decodedJWT.getSubject());
+            boolean verified = decodedJWT.getClaim("verified").asBoolean();
+            UUID tenantId = UUID.fromString(decodedJWT.getClaim("tenantId").asString());
+            boolean deleted = decodedJWT.getClaim("deleted").asBoolean();
+
+            CustomUserDetails userDetails = new CustomUserDetails(
+                    userId,
+                    email,
+                    verified,
+                    authorities,
+                    tenantId,
+                    deleted
             );
 
-            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            UsernamePasswordAuthenticationToken authToken =
+                    new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            authorities
+                    );
+
+            authToken.setDetails(
+                    new WebAuthenticationDetailsSource().buildDetails(request)
+            );
 
             SecurityContextHolder.getContext().setAuthentication(authToken);
         }

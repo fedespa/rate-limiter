@@ -1,11 +1,11 @@
 package com.app.rate_limiter.common.security;
 
+import com.app.rate_limiter.common.security.filter.JwtTokenValidatorFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -24,13 +24,20 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtTokenValidatorFilter jwtTokenValidatorFilter;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationProvider authenticationProvider) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sessionManagement ->
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .authenticationProvider(authenticationProvider)
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(this.customAuthenticationEntryPoint)
+                        .accessDeniedHandler(this.customAccessDeniedHandler)
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/v1/api/auth/**").permitAll()
@@ -38,10 +45,7 @@ public class SecurityConfig {
                         .requestMatchers("/v1/api/invitations/{token}/accept").permitAll()
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(
-                        this.jwtTokenValidatorFilter,
-                        UsernamePasswordAuthenticationFilter.class
-                );
+                .addFilterBefore(this.jwtTokenValidatorFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

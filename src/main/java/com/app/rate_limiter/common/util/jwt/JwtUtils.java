@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -12,8 +13,11 @@ import java.util.UUID;
 @Component
 public class JwtUtils {
 
-    private final static long expirationTime = 21600000;
-    private final String key = "secret";
+    private final static long expirationTime = 5 * 60 * 1000;
+
+    @Value("${jwt.secret}")
+    private String key = "secret";
+
     private final String issuer = "SYSTEM";
 
     public String generateToken(CreateJWTTokenDto dto) {
@@ -30,6 +34,9 @@ public class JwtUtils {
                 .withNotBefore(new Date())
                 .withClaim("email", dto.email())
                 .withClaim("verified", dto.verified())
+                .withClaim("roles", dto.roles())
+                .withClaim("tenantId", dto.tenantId())
+                .withClaim("deleted", dto.deleted())
                 .withSubject(dto.userId())
                 .sign(algorithm);
     }
