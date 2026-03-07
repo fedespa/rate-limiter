@@ -1,13 +1,13 @@
 package com.app.rate_limiter.identity.refreshTokens.model;
 
 import com.app.rate_limiter.common.model.AuditableEntity;
-import com.app.rate_limiter.identity.users.model.AppUser;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Entity
 @Table(name = "refresh_tokens")
@@ -20,9 +20,8 @@ public class RefreshToken extends AuditableEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @JoinColumn(name = "user_id")
-    @ManyToOne(fetch = FetchType.LAZY)
-    private AppUser user;
+    @NotNull
+    private UUID userId;
 
     @NotBlank
     private String tokenHash;

@@ -7,6 +7,7 @@ import com.app.rate_limiter.identity.refreshTokens.model.RefreshToken;
 import com.app.rate_limiter.identity.refreshTokens.repository.RefreshTokenRepository;
 import com.app.rate_limiter.identity.refreshTokens.response.RotatedRefreshToken;
 import com.app.rate_limiter.identity.users.model.AppUser;
+import com.app.rate_limiter.identity.users.repository.AppUserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,13 +25,14 @@ public class RefreshTokenService {
     private final HashUtils hashUtils;
     private final RefreshTokenRepository refreshTokenRepository;
     private final RefreshTokenSecurityService refreshTokenSecurityService;
+    private final AppUserRepository appUserRepository;
 
-    public String create(AppUser user){
+    public String create(UUID userId){
         String rawToken = UUID.randomUUID().toString();
         String tokenHash = hashUtils.sha256(rawToken);
 
         RefreshToken refreshToken = RefreshToken.builder()
-                .user(user)
+                .userId(userId)
                 .tokenHash(tokenHash)
                 .expiresAt(Instant.now().plus(7, ChronoUnit.DAYS))
                 .build();
@@ -47,10 +49,17 @@ public class RefreshTokenService {
         RefreshToken oldToken = this.refreshTokenRepository.findByTokenHash(tokenHash)
                 .orElseThrow(() -> new AppException(ErrorCode.REFRESH_TOKEN_INVALID));
 
-        AppUser user = oldToken.getUser();
+        UUID userId = oldToken.getUserId();
+
+        AppUser user = this.appUserRepository.findByIdWithTenant(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        if (user.getDeletedAt() != null) {
+            throw new AppException(ErrorCode.ACCOUNT_DELETED);
+        }
 
         if (oldToken.isRevoked()) {
-            this.refreshTokenSecurityService.handleTokenReuse(user);
+            this.refreshTokenSecurityService.handleTokenReuse(userId);
             throw new AppException(ErrorCode.REFRESH_TOKEN_REUSE_DETECTED);
         }
 
@@ -61,11 +70,12 @@ public class RefreshTokenService {
         oldToken.setRevoked(true);
         this.refreshTokenRepository.save(oldToken);
 
-        String newRefreshToken = create(user);
+        String newRefreshToken = create(userId);
 
         return new RotatedRefreshToken(
-                user,
-                newRefreshToken
+                userId,
+                newRefreshToken,
+                user
         );
     }
 

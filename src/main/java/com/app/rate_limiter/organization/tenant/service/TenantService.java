@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,6 +52,7 @@ public class TenantService {
     }
 
     @Transactional
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
     public void assignPlan(String tenantId, SubscribeTenantRequest request){
 
         log.info("Iniciando la asignación del plan para el tenant: {}", tenantId);
@@ -71,6 +73,7 @@ public class TenantService {
         log.info("Plan {} asignado a tenant con ID {} exitosamente", plan.getName(), tenant.getId());
     }
 
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
     public PageResponse getTenants(GetTenantRequest request){
 
         Pageable pageable = PageRequest.of(request.page(), 20);

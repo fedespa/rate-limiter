@@ -22,8 +22,11 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -73,23 +76,35 @@ public class AuthService {
         CreateJWTTokenDto createJWTTokenDto = new CreateJWTTokenDto(
                 userDetails.getUsername(),
                 userDetails.isVerified(),
-                userDetails.getUserId().toString()
+                userDetails.getUserId().toString(),
+                userDetails.getAuthorities()
+                        .stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .toList(),
+                userDetails.getTenantId().toString(),
+                userDetails.isDeleted()
         );
 
         String accessToken = this.jwtUtils.generateToken(createJWTTokenDto);
-        String refreshToken = this.refreshTokenService.create(userDetails.getUser());
+        String refreshToken = this.refreshTokenService.create(userDetails.getUserId());
 
         return new TokensResponse(accessToken, refreshToken);
     }
 
+    @Transactional
     public TokensResponse refreshToken(String rawRefreshToken) {
 
         RotatedRefreshToken rotated = this.refreshTokenService.rotateToken(rawRefreshToken);
 
+        AppUser user = rotated.user();
+
         CreateJWTTokenDto dto = new CreateJWTTokenDto(
-                rotated.user().getEmail(),
-                rotated.user().getVerifiedAt() != null,
-                rotated.user().getId().toString()
+                user.getEmail(),
+                user.getVerifiedAt() != null,
+                user.getId().toString(),
+                List.of(user.getRole().name()),
+                user.getTenant().getId().toString(),
+                user.getDeletedAt() != null
         );
 
         String accessToken = this.jwtUtils.generateToken(dto);
