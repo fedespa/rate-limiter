@@ -41,6 +41,23 @@ services:
       interval: 5s
       timeout: 3s
       retries: 5
+  rate-limiter:
+    build: .
+    mem_limit: 512m
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+
 
 volumes:
   postgres_data:
